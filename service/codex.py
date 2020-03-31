@@ -14,8 +14,39 @@ class Codex:
         for o in self.client.describe()['sobjects']:
             if o['createable']:
                 t = Table(getattr(self.client, o['name']))
-                self._tables[o['name']] = t
+                self._tables[o['label']] = t
                 setattr(self, o['name'], t)
+
+    def query(self, *cols, table: str, **kwargs):
+        if table not in self._tables.keys():
+            raise ValueError(f'{table} is not a valid table name.')
+        limit = self._gen_limit(kwargs.get('limit'))
+        where = self._gen_where(kwargs.get('where'))
+        q = self._gen_query(cols, table, where, limit)
+        return self.client.query(q)
+
+    @staticmethod
+    def _gen_limit(limit=None):
+        if limit:
+            return ' LIMIT ' + str(limit)
+        else:
+            return ''
+
+    @staticmethod
+    def _gen_query(columns: list, table: str, where: str, limit: str):
+        cols = ', '.join(columns)
+        return 'SELECT ' + cols + ' FROM ' + table + where + limit
+
+    @staticmethod
+    def _gen_where(where=None):
+        if where:
+            if isinstance(where, list):
+                w = ' AND '.join(where)
+            else:
+                w = where
+            return ' WHERE ' + w
+        else:
+            return ''
 
 
 class Table:
