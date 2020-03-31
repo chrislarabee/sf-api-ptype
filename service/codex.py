@@ -1,15 +1,31 @@
-from simple_salesforce import Salesforce
+from simple_salesforce import Salesforce, SFType
 
-from config import SFCONFIG
+from service.util import Config
 
-client = Salesforce(
-    username=SFCONFIG.username,
-    password=SFCONFIG.password,
-    security_token=SFCONFIG.security_token
-)
 
-accounts = client.bulk.Account.query('select Id, Name from Account limit 10')
+class Codex:
+    def __init__(self, config: Config):
+        self.client = Salesforce(
+            username=config.username,
+            password=config.password,
+            security_token=config.security_token
+        )
+        self._tables = dict()
+        for o in self.client.describe()['sobjects']:
+            if o['createable']:
+                self._tables[o['name']] = getattr(self.client, o['name'])
 
-if __name__ == '__main__':
-    for a in accounts:
-        print(a)
+    def schema(self, tablename: str):
+        return self._gen_schema(self._tables[tablename])
+
+    @staticmethod
+    def _gen_schema(sftype_obj: SFType):
+        cols = []
+        for f in sftype_obj.describe()['fields']:
+            d = dict(
+                label=f['label'],
+                name=f['name'],
+                type=f['type']
+            )
+            cols.append(d)
+        return cols
