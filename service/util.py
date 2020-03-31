@@ -7,10 +7,12 @@ class Config:
     def __init__(self, **kwargs):
         """
 
-        :param kwargs: Using this approach allows an arbitrarily large
-            number of attributes to be stored in Config with minimal
-            effort. If a kwarg becomes important enough to be declared
-            during each init, then it should be added below.
+        Args:
+            kwargs: Using this approach allows an arbitrarily large
+                number of attributes to be stored in Config with
+                minimal effort. If a kwarg becomes important enough to
+                be declared during each init, then it should be added
+                below.
         """
         self.username = None
         self.password = None
