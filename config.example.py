@@ -1,4 +1,4 @@
-from lib.util import Config
+from service.util import Config
 
 SFCONFIG = Config(
     username='example@doman.com',
