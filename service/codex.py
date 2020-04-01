@@ -62,7 +62,7 @@ class Codex:
             results += r['records']
         return results
 
-    def query_bulk(self, q: str, table_api_name: str) -> list:
+    def queryb(self, q: str, table_api_name: str) -> list:
         """
         Queries the Salesforce Bulk API using the passed SOQL query
         string and table_api_name.
@@ -130,7 +130,7 @@ class Table:
         q = ('SELECT ' + field_str + ' FROM ' + self.api_name
              + where + limit)
         if kwargs.get('bulk'):
-            return self.parent.query_bulk(q, self.api_name)
+            return self.parent.queryb(q, self.api_name)
         else:
             return self.parent.query(q)
 

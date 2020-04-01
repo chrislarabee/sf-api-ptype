@@ -98,16 +98,16 @@ And you can combine any of the above kwargs as desired.
 
 As an alternative to querying using the Tables on the Codex, you can 
 directly query the connected Salesforce instance via the REST or Bulk
-API using the query and query_bulk methods on the Codex object:
+API using the query and queryb methods on the Codex object:
 ```
 Codex().query(("SELECT Id, Name FROM Account "
                "WHERE Name like 'Great Falls%'"))
 ```
 
-query_bulk also requires that you pass the api_name of the table you
+queryb also requires that you pass the api_name of the table you
 want to query:
 ```
-Codex().query_bulk(("SELECT Id, Name FROM Account "
-                    "WHERE Name like 'Great Falls%'"),
-		   'Account')
+Codex().queryb(("SELECT Id, Name FROM Account "
+                "WHERE Name like 'Great Falls%'"),
+                'Account')
 ```
