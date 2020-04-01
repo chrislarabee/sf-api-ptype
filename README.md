@@ -62,35 +62,52 @@ Codex().Account.schema['Name']
 
 ### Querying
 
-You can query any of the tables in the Codex either by using the Codex's 
-`query` method, or the `select` method on the table attribute.
+You can query any of the tables in the Codex by calling the  `select` 
+method on the table attribute.
 
 For example, you can query the Account table in a Salesforce instance by
 connecting a Codex and then running:
 ```
 Codex().Account.select()
-# or:
-Codex().query(table='Account')
 ```
 To select every row and column in the Account table.
 
 You could also just select Account names and ids with:
 ```
 Codex().Account.select('Id', 'Name')
-# or:
-Codex().query('Id', 'Name', table='Account')
 ```
 
 And you can limit the number of records retrieved with:
 ```
 Codex().Account.select('Id', 'Name', limit=5)
-# or:
-Codex().query('Id', 'Name', table='Account')
 ```
 
 Or specify a where clause with:
 ```
-Codex().Account.select('Id', 'Name', where="Name like 'Great Falls%')
-# or:
-Codex().query('Id', 'Name', where="Name like 'Great Falls%')
-``` 
+Codex().Account.select('Id', 'Name', where="Name like 'Great Falls%'")
+```
+
+You can also query the Bulk API rather than the REST API with:
+```
+Codex().Account.select(bulk=True)
+```
+
+And you can combine any of the above kwargs as desired.
+
+#### Custom SOQL Statements
+
+As an alternative to querying using the Tables on the Codex, you can 
+directly query the connected Salesforce instance via the REST or Bulk
+API using the query and query_bulk methods on the Codex object:
+```
+Codex().query(("SELECT Id, Name FROM Account "
+               "WHERE Name like 'Great Falls%'"))
+```
+
+query_bulk also requires that you pass the api_name of the table you
+want to query:
+```
+Codex().query_bulk(("SELECT Id, Name FROM Account "
+                    "WHERE Name like 'Great Falls%'"),
+		   'Account')
+```

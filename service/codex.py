@@ -43,25 +43,39 @@ class Codex:
         setattr(self, table_api_name, t)
         return t
 
-    def query(self, *cols, table: str, **kwargs):
+    def query(self, q: str):
         """
-        A convenience function for generating a SOQL query string for
-        a specific table right from the Codex object.
+        Queries the Salesforce REST API using the passed SOQL query
+        string.
 
         Args:
-            cols: A comma-separated list of columns found in the
-                target table. Use the api_names for the columns/fields.
-            table: A string, the valid api_name for a table in the
-                connected Salesforce instance.
-            kwargs: Key/value args. See Table.select for details, as
-                these kwargs are passed directly on.
+            q: A valid SOQL query string.
 
-        Returns: The results of the query on the target table.
+        Returns: A list of OrderedDicts, the records resulting from
+            the bulk query.
+
         """
-        if table not in self._tables.keys():
-            raise ValueError(f'{table} is not a valid table name.')
-        t = self._tables[table]
-        return t.select(*cols, **kwargs)
+        r = self.client.query(q)
+        results = r['records']
+        while not r['done']:
+            r = self.client.query_more(r['nextRecordsUrl'], True)
+            results += r['records']
+        return results
+
+    def query_bulk(self, q: str, table_api_name: str) -> list:
+        """
+        Queries the Salesforce Bulk API using the passed SOQL query
+        string and table_api_name.
+
+        Args:
+            q: A valid SOQL query string.
+            table_api_name: A table's api_name.
+
+        Returns: A list of OrderedDicts, the records resulting from
+            the bulk query.
+
+        """
+        return getattr(self.client.bulk, table_api_name).query(q)
 
 
 class Table:
@@ -97,6 +111,9 @@ class Table:
                 this argument or pass '*' or None to select all the
                 fields on this Table.
             **kwargs: Currently in use kwargs:
+                bulk: A boolean, which toggles whether to use the
+                    Salesforce bulk API (True) or the REST API
+                    (False/None).
                 limit: An integer, specifies the maximum number of
                     records to return from this select statement.
                 where: A string or list/tuple of strings, which will
@@ -112,7 +129,10 @@ class Table:
         field_str = self._field_str(cols)
         q = ('SELECT ' + field_str + ' FROM ' + self.api_name
              + where + limit)
-        return self.parent.client.query(q)
+        if kwargs.get('bulk'):
+            return self.parent.query_bulk(q, self.api_name)
+        else:
+            return self.parent.query(q)
 
     def _field_str(self, fields: (list, tuple)):
         """
