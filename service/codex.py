@@ -24,9 +24,24 @@ class Codex:
             n = o['name']
             if o['createable'] and (n in config.tables or
                                     len(config.tables) == 0):
-                t = Table(getattr(self.client, n), self)
-                self._tables[n] = t
-                setattr(self, n, t)
+                self.get_table(n)
+
+    def get_table(self, table_api_name: str):
+        """
+        Adds a table from the attached Salesforce instance as a new
+        Table object attribute on the Codex.
+
+        Args:
+            table_api_name: A string, the API name of the table in the
+                attached Salesforce instance.
+
+        Returns: The generated Table object.
+
+        """
+        t = Table(getattr(self.client, table_api_name), self)
+        self._tables[table_api_name] = t
+        setattr(self, table_api_name, t)
+        return t
 
     def query(self, *cols, table: str, **kwargs):
         """
