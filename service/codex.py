@@ -1,6 +1,6 @@
 from simple_salesforce import Salesforce, SFType
 
-from service.util import Config
+from config import SFCONFIG
 
 
 class Codex:
@@ -8,22 +8,17 @@ class Codex:
     Acts as a conduit to a Salesforce instance, as well as a central
     repository for metadata on the tables in the instance.
     """
-    def __init__(self, config: Config):
-        """
-
-        :param config: A Config object, which must have a value for
-            username, password, and security_token at minimum.
-        """
+    def __init__(self):
         self.client = Salesforce(
-            username=config.username,
-            password=config.password,
-            security_token=config.security_token
+            username=SFCONFIG.username,
+            password=SFCONFIG.password,
+            security_token=SFCONFIG.security_token
         )
         self._tables = dict()
         for o in self.client.describe()['sobjects']:
             n = o['name']
-            if o['createable'] and (n in config.tables or
-                                    len(config.tables) == 0):
+            if o['createable'] and (n in SFCONFIG.tables or
+                                    len(SFCONFIG.tables) == 0):
                 self.get_table(n)
 
     def get_table(self, table_api_name: str):

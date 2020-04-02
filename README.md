@@ -1,6 +1,7 @@
-# Salesforce API Prototype
+# Salesforce API Codex
 
-Some testing to connect to a Developer Salesforce Instance
+Provides useful classes and methods for connecting to a Salesforce
+instance via the API.
 
 ## Setup
 
@@ -16,9 +17,6 @@ Install requirements:
 pip install -r requirements.txt
 ```
 
-Make a copy of `config.example.py` and name it `config.py`. Populate it
-with your Salesforce username, password, and security token. 
-
 ### Get Salesforce Security Token
 
 To get your security token from Salesforce, login to Salesforce, go to
@@ -28,23 +26,36 @@ in an email. This is the only way to get a security token, so if you lose
 your token and generate a new one you'll need to update any application
 that uses the API to access Salesforce with your token.
 
+### Setup Config
+
+Make a copy of `config.example.py` and name it `config.py`. Populate it
+with your Salesforce username, password, and security token. Optionally,
+you can supply a `tables` argument (as a tuple containing table api_names)
+to specify which tables you want to pull from the Salesforce instance on 
+instantiation. This improves performance if you know exactly what tables 
+you want to explore/pull data from. If you don't supply a `tables` 
+argument, Codex will just pull all the tables on instantiation.
+
 ## Using the Codex
 
 This repository doesn't really contain a main function, it's very much
 intended to be an exploratory tool and to be incorporated into another
 application.
 
-`service.codex` contains a Codex class, which takes a Config object from 
-`service.util`. The Codex acts as the conduit to the Salesforce instance 
-that the Config object's credentials allow access to. Codex objects have 
-all the requested tables of the Salesforce instance as attributes (or all
-the tables if no tables were specifiied in the config). 
+`service.codex` contains a Codex class, which acts as the conduit to the 
+Salesforce instance that the `config.py` credentials allow access to. Codex 
+objects have all the requested tables of the Salesforce instance as 
+attributes (or all the tables if no tables were specified in the config).
+
+During exploration, you can always add tables to an existing Codex with the
+`get_table` method. This method adds the passed table api_name as an 
+attribute on the Codex, ready for further exploration and querying. 
 
 ### Metadata
 
 When exploring a Salesforce instance via the API, you can use the Codex to
 assist you. Any table in the Salesforce instance can be an attribute on the
-Codex (as specified, or not, in the config), and can provide with its metadata with:
+Codex, and can provide with its metadata with:
 ```
 Codex().Account.fields
 Codex().Account.schema
@@ -63,7 +74,10 @@ Codex().Account.schema['Name']
 ### Querying
 
 You can query any of the tables in the Codex by calling the  `select` 
-method on the table attribute.
+method on the Table attribute. Note that the Codex does not store any
+records contained in Salesforce tables, nor does its Table attributes, 
+running queries goes through the API to get data, the Codex and Tables
+just serve as intermediaries.
 
 For example, you can query the Account table in a Salesforce instance by
 connecting a Codex and then running:
