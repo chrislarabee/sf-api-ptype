@@ -94,7 +94,8 @@ class Table:
         self._sftype_obj = sftype_obj
         self.api_name = self._sftype_obj.name
         self.label = self._sftype_obj.describe()['label']
-        self.fields, self.schema = self._gen_schema(sftype_obj)
+        (self.fields, self.schema,
+         self.field_ct, self.cfield_ct) = self._gen_schema(sftype_obj)
 
     def select(self, *cols, **kwargs):
         """
@@ -192,16 +193,19 @@ class Table:
         """
         cols = []
         schema = dict()
+        cust_field_ct = 0
         for f in sftype_obj.describe()['fields']:
-            label = f['label']
             name = f['name']
-            type_ = f['type']
+            custom = f['custom']
+            if custom:
+                cust_field_ct += 1
             schema[name] = dict(
-                label=label,
-                type=type_
+                label=f['label'],
+                type=f['type'],
+                custom=custom
             )
             cols.append(name)
-        return cols, schema
+        return cols, schema, len(cols), cust_field_ct
 
     @staticmethod
     def _gen_where(where=None):
