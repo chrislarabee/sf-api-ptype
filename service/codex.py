@@ -1,3 +1,4 @@
+from pyperclip import copy
 from simple_salesforce import Salesforce, SFType
 
 from config import SFCONFIG
@@ -205,7 +206,7 @@ class Table:
                 custom=custom
             )
             cols.append(name)
-        return cols, schema, len(cols), cust_field_ct
+        return Record(cols), Record(schema), len(cols), cust_field_ct
 
     @staticmethod
     def _gen_where(where=None):
@@ -226,3 +227,48 @@ class Table:
             return ' WHERE ' + w
         else:
             return ''
+
+
+class Record:
+    """
+    A convenience object that wraps other python objects and provides
+    methods like clip that make it easier to explore and move the data
+    stored in said objects.
+    """
+    def __init__(self, r):
+        """
+
+        Args:
+            r: Any object.
+        """
+        self._data = r
+
+    def clip(self):
+        """
+        Uses pyperclip to copy the data held by the Record object to
+        the clipboard. Removes python syntax around strings and such.
+
+        Returns: None
+
+        """
+        if isinstance(self._data, list):
+            d = ','.join(self._data)
+        elif isinstance(self._data, dict):
+            x = []
+            for k, v in self._data.items():
+                x.append(f'{k}:{v}')
+            d = ','.join(x)
+        else:
+            d = str(self._data)
+        copy(d)
+
+    def __repr__(self):
+        """
+        Overrides __repr__ so that when the Record is called it spits
+        out the data it contains rather than a representation of the
+        Record object.
+
+        Returns: A string representation of the data in self._data.
+
+        """
+        return str(self._data)
